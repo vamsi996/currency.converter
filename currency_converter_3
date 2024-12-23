@@ -1,0 +1,122 @@
+//currency_converter
+import 'package:flutter/material.dart';
+
+void main() {
+  runApp(CurrencyConverterApp());
+}
+
+class CurrencyConverterApp extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    return MaterialApp(
+      debugShowCheckedModeBanner: false,
+      home: CurrencyConverter(),
+    );
+  }
+}
+
+class CurrencyConverter extends StatefulWidget {
+  @override
+  _CurrencyConverterState createState() => _CurrencyConverterState();
+}
+
+class _CurrencyConverterState extends State<CurrencyConverter> {
+  final TextEditingController _amountController = TextEditingController();
+  String _convertedAmount = '';
+  String _fromCurrency = 'USD';
+  String _toCurrency = 'INR';
+
+  final Map<String, double> exchangeRates = {
+    'USD': 1.0,
+    'INR': 82.0,
+    'EUR': 0.92,
+    'GBP': 0.78,
+    'JPY': 135.0,
+  };
+
+  void _convertCurrency() {
+    double? amount = double.tryParse(_amountController.text);
+    if (amount == null) {
+      setState(() {
+        _convertedAmount = 'Invalid input';
+      });
+      return;
+    }
+
+    double rate = exchangeRates[_toCurrency]! / exchangeRates[_fromCurrency]!;
+    double converted = amount * rate;
+
+    setState(() {
+      _convertedAmount = converted.toStringAsFixed(2);
+    });
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(
+        title: Text('Currency Converter'),
+      ),
+      body: Padding(
+        padding: const EdgeInsets.all(16.0),
+        child: Column(
+          children: [
+            TextField(
+              controller: _amountController,
+              keyboardType: TextInputType.number,
+              decoration: InputDecoration(
+                labelText: 'Enter Amount',
+                border: OutlineInputBorder(),
+              ),
+            ),
+            SizedBox(height: 16),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                DropdownButton<String>(
+                  value: _fromCurrency,
+                  onChanged: (value) {
+                    setState(() {
+                      _fromCurrency = value!;
+                    });
+                  },
+                  items: exchangeRates.keys.map((String key) {
+                    return DropdownMenuItem<String>(
+                      value: key,
+                      child: Text(key),
+                    );
+                  }).toList(),
+                ),
+                Text('to'),
+                DropdownButton<String>(
+                  value: _toCurrency,
+                  onChanged: (value) {
+                    setState(() {
+                      _toCurrency = value!;
+                    });
+                  },
+                  items: exchangeRates.keys.map((String key) {
+                    return DropdownMenuItem<String>(
+                      value: key,
+                      child: Text(key),
+                    );
+                  }).toList(),
+                ),
+              ],
+            ),
+            SizedBox(height: 16),
+            ElevatedButton(
+              onPressed: _convertCurrency,
+              child: Text('Convert'),
+            ),
+            SizedBox(height: 16),
+            Text(
+              _convertedAmount.isEmpty ? '' : 'Converted Amount: $_convertedAmount $_toCurrency',
+              style: TextStyle(fontSize: 18),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
